@@ -1,0 +1,49 @@
+service: template
+
+frameworkVersion: "2"
+
+plugins:
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-offline
+  - serverless-plugin-warmup
+
+custom:
+  webpack:
+    webpackConfig: webpack.config.ts
+    includeModules:
+      forceExclude:
+        - aws-sdk
+
+  warmup:
+    payload:
+      body:
+        source: warmup
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  # region: eu-central-1
+  # stage: test
+  apiGateway:
+    shouldStartNameWithService: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+      Resource: "*"
+
+functions:
+  helloWorld:
+    description: >
+      Example function
+    handler: src/index.helloWorld
+    warmup: true
+    events:
+      - http:
+          path: hello-world
+          method: get
+          cors: true
